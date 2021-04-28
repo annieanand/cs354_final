@@ -12,12 +12,23 @@ class Boid():
 
         self.width = width
         self.height = height
+        self.max_speed = 7
+  
     def show(self):
         stroke(255)
         circle((self.position.x, self.position.y), 10) #change later?
-    def update(self):
+  
+    def update(self, is_pressed):
+        if is_pressed == True:
+            return
         self.position = self.position + self.velocity #update position by adding the direction vector
         self.velocity = self.velocity + self.acceleration
+
+        #create a max speed so that the boids continue with smoother movements
+        if np.linalg.norm(self.velocity) > self.max_speed:
+            #normalize vectors
+            self.velocity = self.velocity / np.linalg.norm(self.velocity) * self.max_speed
+        self.acceleration = Vector(np.zeros(1), np.zeros(1))
     #create boundaries for boids
     def bounding(self):
         if self.position.x > self.width:
@@ -29,3 +40,4 @@ class Boid():
             self.position.y = 0
         elif self.position.y < 0:
             self.position.y = self.height
+

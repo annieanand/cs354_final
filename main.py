@@ -14,13 +14,15 @@ def setup():
 
 #draw the background
 def draw():
+    is_pressed = False
     background(30, 30, 47)
-
+    if mouse_is_pressed:
+        is_pressed = True
     #loop through the flock array to show the boid
     for b in flock:
         b.bounding()
         b.show()
-        b.update()
-        
-
-run()
+        b.update(is_pressed)    
+            
+if __name__ == '__main__':
+    run()
