@@ -81,7 +81,28 @@ class Boid():
             if np.linalg.norm(steer) > self.max_force: #controls for the magnitude for steering
                 steer = (steer / np.linalg.norm(steer)) * self.max_force #normalize!
         return steer
-        
+    
+    #last step, separation
+    def separation(self,boids):
+        steer = Vector(np.zeros(1), np.zeros(1))
+        total = 0
+        avg_dir = Vector(np.zeros(1), np.zeros(1))
+        for b in boids: #loop through boids
+            dist = np.linalg.norm(b.position - self.position) #normalize vector between next boid (direction of escape)
+            if self.position != b.position and dist < self.distance_to_next: #check whether the current boid is the same as the next position, and if it is within appropriate radius
+                distance_away = self.position - b.position #calculate distance away 
+                distance_away = distance_away/dist #change the distance - based on the direcction of escape                avg_dir += distance_away #append to avg direction vec
+                total = total +1
+            if total > 0:
+                avg_dir = avg_dir / total #set new average direction
+                avg_dir = Vector(*avg_dir)
+                if np.linalg.norm(steer) > 0: #check if the steer dir is positive
+                    avg_dir = (avg_dir / np.linalg.norm(steer)) *self.max_speed  #normalize it and mult by speed
+                steer = avg_dir - self.velocity #adjust the steer vector again
+                if np.linalg.norm(steer) > self.max_force: #check if the steer magnitude is over the max force. if it is:
+                    steer = (steer / np.linalg.norm(steer)) *self.max_force #weight the steer by force (based on dist away)
+        return steer
+    
     #function to apply the different behaviors on the boids
     def apply_behavior(self, boids):
         aligned = self.align(boids)
@@ -89,3 +110,6 @@ class Boid():
 
         cohe =  self.cohesion(boids)
         self.acceleration += cohe
+
+        separation = self.separation(boids)
+        self.acceleration += separation
