@@ -13,7 +13,7 @@ class Boid():
         self.width = width
         self.height = height
         self.max_speed = 7
-  
+        self.distance_to_next = 100
     def show(self):
         stroke(255)
         circle((self.position.x, self.position.y), 10) #change later?
@@ -40,4 +40,28 @@ class Boid():
             self.position.y = 0
         elif self.position.y < 0:
             self.position.y = self.height
+   
+    #now to add behavior to the flock
+    #steering = avg_vec of boids - self.velocity
 
+    def align(self, boids):
+        steer = Vector(np.zeros(1), np.zeros(1)) #initialize steering vector
+        total = 0  
+        avg_dir = Vector(np.zeros(1), np.zeros(1)) #average dir of boids
+        for b in boids: # loop through the boids
+            if np.linalg.norm(b.position - self.position) < self.distance_to_next: #check which boids are within appropriate distance
+                avg_dir += b.velocity #if it is then add the boid velocity to the avg direction
+                total = total + 1 # to see how many boids are near
+            
+        if total > 0:
+            avg_dir = avg_dir / total #find the new average 
+            avg_dir = Vector(*avg_dir) #create new vec with value
+            avg_dir = (avg_dir / np.linalg.norm(avg_dir)*self.max_speed) #normalize it for direction and multiply by speed
+            steer = avg_dir - self.velocity  #calculate the steering direction now
+        return steer 
+    
+    #add in cohesion next - steer toward center of mass
+    
+    def apply_behavior(self, boids):
+        aligned = self.align(boids)
+        self.acceleration += aligned
