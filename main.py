@@ -22,7 +22,9 @@ def draw():
     for b in flock:
         b.bounding()
         b.show()
+        b.apply_behavior(flock)
         b.update(is_pressed)    
-            
+
+
 if __name__ == '__main__':
     run()

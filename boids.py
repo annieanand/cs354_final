@@ -13,6 +13,7 @@ class Boid():
         self.width = width
         self.height = height
         self.max_speed = 7
+        self.max_force = 1
         self.distance_to_next = 100
     def show(self):
         stroke(255)
@@ -61,7 +62,30 @@ class Boid():
         return steer 
     
     #add in cohesion next - steer toward center of mass
-    
+    #assume boids are all the same mass! 
+    def cohesion(self,boids):
+        steer = Vector(np.zeros(1), np.zeros(1)) #initialize steering vector
+        total = 0
+        com = Vector(np.zeros(1), np.zeros(1)) #initialize center of mass
+        for b in boids:
+            if np.linalg.norm(b.position - self.position) > self.distance_to_next:
+                com += b.position #change center of mass based on boid position with respect to neighbors
+                total += 1
+        if total >0:
+            com = com /total #set center of mass to the average of the boids
+            com = Vector(*com)
+            com_to_boid = com - self.position
+            if np.linalg.norm(com_to_boid) > 0: # check if the boid is not the com
+                com_to_boid = (com_to_boid / np.linalg.norm(com_to_boid)) * self.max_speed #normalize vector towards com
+            steer = com_to_boid - self.velocity
+            if np.linalg.norm(steer) > self.max_force: #controls for the magnitude for steering
+                steer = (steer / np.linalg.norm(steer)) * self.max_force #normalize!
+        return steer
+        
+    #function to apply the different behaviors on the boids
     def apply_behavior(self, boids):
         aligned = self.align(boids)
         self.acceleration += aligned
+
+        cohe =  self.cohesion(boids)
+        self.acceleration += cohe
