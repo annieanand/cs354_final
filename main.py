@@ -18,7 +18,9 @@ def draw():
 
     #loop through the flock array to show the boid
     for b in flock:
+        b.bounding()
         b.show()
-
+        b.update()
+        
 
 run()
